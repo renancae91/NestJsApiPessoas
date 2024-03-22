@@ -19,21 +19,28 @@ export class AppController {
   ) {}
 
   @Get('pessoas')
+  @HttpCode(200)
   async getHello() {
     const data = await this.databaseService.query(`select * from pessoas`);
     return data.rows;
   }
   @Post('pessoas')
+  @HttpCode(200)
   create(@Body() createPessoa: any) {
     const { nome, idade, nacionalidade } = createPessoa
     const values = [nome, idade, nacionalidade];
-    return this.databaseService.query(
-      `insert into pessoas ( nome, idade, nacionalidade) VALUES ( $1, $2, $3 )`,
-      values,
-    );
+    try {
+      this.databaseService.query(
+        `insert into pessoas ( nome, idade, nacionalidade) VALUES ( $1, $2, $3 )`,
+        values,
+      );
+      return { menssagem: 'incluido com sucesso' };
+    } catch {
+      return { menssagem: 'erro ao icluir' };
+    }
   }
   @Patch('pessoas/:id')
-  @HttpCode(202)
+  @HttpCode(200)
   update(@Param('id') id: string, @Body() updatePessoa: any) {
     const { nome, idade, nacionalidade } = updatePessoa;
     const values = [nome, idade, nacionalidade, id];
@@ -41,7 +48,7 @@ export class AppController {
       this.databaseService.query(
         `update pessoas set nome = $1, idade = $2, nacionalidade = $3 WHERE id = $4`,
         values,
-      ); 
+      );
       return { menssagem: 'alterado com sucesso'}
     } catch {
       return { menssagem: 'erro ao editar' };
@@ -49,6 +56,7 @@ export class AppController {
   }
 
   @Delete('pessoas/:id')
+  @HttpCode(200)
   remove(@Param('id') id: string) {
     const values = [id];
 
